@@ -1,0 +1,55 @@
+## This generates an ever-increasing number based on the date and build. Useful for CI\CD scenario's.
+name: $(date:yyyy.M.d)$(rev:.r) 
+
+parameters:
+  - name: publishPreRelease
+    displayName: Publish pre-release package (when not building from root branch)
+    type: boolean
+    default: false
+
+pr:
+  branches:
+    include:
+    - main
+
+trigger:
+  branches:
+    include: 
+    - main
+    #- '*'
+  paths:
+    exclude:
+    - doc/*
+    - README.md
+    - .order
+
+resources:
+  repositories:
+    - repository: yamlTemplates
+      type: github
+      name: "ArnoPeters/Pipelines"
+      endpoint: github.com_ArnoPeters
+
+variables:
+  - name: 'AzureDevopsArtifactsFeed' 
+    value: # TODO: 'AzureDevopsTeamProjectName/ArtifactsFeedName' # Use plain text, no html or url encoding needed!
+  
+stages:
+- stage: Build
+  displayName: Build and Publish nuget package 
+  pool:
+    vmImage: 'ubuntu-latest'
+  jobs:
+  - template: AzDO/yaml/jobs/AzDOArtifacts_publishNugetPackage.yml@yamlTemplates
+    parameters:
+      azureArtifactsTargetFeed: '$(AzureDevopsArtifactsFeed)'
+      publishPreRelease: ${{ parameters.publishPreRelease }}
+      buildSteps:  
+      - task: UseDotNet@2
+        displayName: 'Use dotnet 6'
+        inputs:
+          version: '6.0.x'
+      - template: AzDO/yaml/steps/buildAndTest.yml@yamlTemplates
+        parameters:
+          azureArtifactsSourceFeed: '$(AzureDevopsArtifactsFeed)'
+          runSettingsFile: 'src/.runsettings'
