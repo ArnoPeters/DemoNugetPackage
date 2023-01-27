@@ -31,8 +31,7 @@ resources:
       endpoint: github.com_ArnoPeters
 
 variables:
-  - name: 'AzureDevopsArtifactsFeed' 
-    value: # TODO: 'AzureDevopsTeamProjectName/ArtifactsFeedName' # Use plain text, no html or url encoding needed!
+  - group: 'ProjectVariables' # Contains Team Project global variables
   
 stages:
 - stage: Build
@@ -42,7 +41,7 @@ stages:
   jobs:
   - template: AzDO/yaml/jobs/AzDOArtifacts_publishNugetPackage.yml@yamlTemplates
     parameters:
-      azureArtifactsTargetFeed: '$(AzureDevopsArtifactsFeed)'
+      azureArtifactsTargetFeed: '$(ProjectAzureDevopsArtifactsFeed)'
       publishPreRelease: ${{ parameters.publishPreRelease }}
       buildSteps:  
       - task: UseDotNet@2
@@ -51,5 +50,5 @@ stages:
           version: '6.0.x'
       - template: AzDO/yaml/steps/buildAndTest.yml@yamlTemplates
         parameters:
-          azureArtifactsSourceFeed: '$(AzureDevopsArtifactsFeed)'
+          azureArtifactsSourceFeed: '$(ProjectAzureDevopsArtifactsFeed)'
           runSettingsFile: 'src/.runsettings'
