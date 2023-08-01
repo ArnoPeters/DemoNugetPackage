@@ -30,7 +30,7 @@ resources:
     - repository: yamlTemplates
       type: github
       name: "ArnoPeters/Pipelines"
-      endpoint: github.com_ArnoPeters
+      endpoint: ArnoPeters
 
 variables:
   - group: 'ProjectVariables' # Contains Team Project global variables
